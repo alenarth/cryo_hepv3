@@ -1,0 +1,135 @@
+:root {
+    --primary-color: #1a237e;
+    --secondary-color: #0d47a1;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system;
+    background: #f8f9fa;
+}
+
+.navbar {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.main-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 20px;
+    margin-top: 70px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transform: translateY(-50px);
+    position: relative;
+    z-index: 1;
+}
+
+.graph-container {
+    height: 600px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.control-panel {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.btn-primary {
+    background: #2196F3;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #1976D2;
+    transform: translateY(-2px);
+}
+
+.optimal-value {
+    background: #e8f5e9;
+    border-left: 4px solid #2e7d32;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: var(--primary-color);
+}
+
+.info-section {
+    background: #f8f9fa;
+}
+
+/* Developer Page Specific */
+.algorithm-info {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.algorithm-info ul, 
+.algorithm-info ol {
+    padding-left: 25px;
+    margin: 15px 0;
+}
+
+.algorithm-info li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.card-title {
+    color: #1a237e;
+    border-bottom: 2px solid #2196F3;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.alert-info {
+    background: #e3f2fd;
+    border-color: #90caf9;
+    color: #0d47a1;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.metric-card {
+    padding: 1.5rem;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metric-card.bg-primary { background: #2196F3; }
+.metric-card.bg-success { background: #4CAF50; }
+
+.plot-container {
+    height: 500px;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.js-plotly-plot .plot-container .main-svg {
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.modebar {
+    background: rgba(255,255,255,0.9) !important;
+    border-radius: 4px;
+    padding: 4px;
+}

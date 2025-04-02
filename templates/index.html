@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistema de Otimização de Criopreservação</title>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Sistema de Otimização de Criopreservação</a>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Simulador</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/developer">Área de Desenvolvedor</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <h2 class="mb-4">Simulador de Viabilidade Celular Pós-Criopreservação</h2>
+        
+        <div class="row g-4">
+            <!-- Painel de Controle -->
+            <div class="col-md-4">
+                <div class="control-panel">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo Celular:</label>
+                        <select id="cellType" class="form-select">
+                            {% for ct in config.CELL_TYPES %}
+                            <option value="{{ ct }}">{{ ct | upper }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Crioprotetor:</label>
+                        <select id="cryoprotector" class="form-select">
+                            {% for cp in config.FEATURES %}
+                            <option value="{{ cp.split()[-1] }}">{{ cp.split()[-1] | title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Concentração:</label>
+                        <input type="range" id="concentration" class="form-range" 
+                               min="0" max="100" step="5" value="0">
+                        <div class="text-center mt-2">
+                            <span id="currentConc" class="badge bg-primary">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 align-items-center mt-2">
+                        <div class="col-auto">
+                            <button class="btn btn-primary" onclick="calculateSpecificViability()">
+                                Calcular para 0%
+                            </button>
+                        </div>
+                        <div class="col-auto">
+                            <div class="alert alert-success" role="alert" id="specificViabilityResult" style="display: none;">
+                                Viabilidade: <strong><span id="specificViabilityValue">-</span>%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="optimalResult" class="optimal-value mt-4">
+                        <h5>Ponto Ótimo:</h5>
+                        <p class="mb-0">Concentração: <span id="optConc">-</span>%</p>
+                        <p>Viabilidade: <span id="optViab">-</span>%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            <div class="col-md-8">
+                <div class="graph-container p-3">
+                    <div id="viabilityPlot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-section py-5" style="background: #f8f9fa;">
+        <div class="container">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Como Funciona</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="lead">
+                                O sistema preditivo integra dados experimentais históricos de criopreservação com algoritmos de aprendizado de máquina para otimizar protocolos de congelamento celular.
+                                Ao selecionar um tipo celular e ajustar concentrações de crioprotetores, o modelo XGBoost - treinado em milhares de ensaios biológicos - calcula em tempo real a viabilidade esperada através de relações não lineares aprendidas entre composições químicas e respostas celulares.
+                            </p>
+                            <p>
+                                O núcleo do sistema utiliza árvores de decisão otimizadas que analisam padrões complexos em cinco dimensões (um crioprotetor principal + quatro adjuvantes), gerando curvas dose-resposta dinâmicas e identificando concentrações ideais que maximizam a sobrevivência celular. Cada predição é complementada por análises de incerteza (intervalos de confiança de 95%) e explicações quantitativas do impacto individual de cada composto, permitindo ajustes precisos baseados em evidências estatísticas robustas.
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <h5>Instruções Rápidas:</h5>
+                                <ol>
+                                    <li>Selecione o tipo celular</li>
+                                    <li>Escolha o crioprotetor</li>
+                                    <li>Ajuste a concentração</li>
+                                    <li>Analise os resultados</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configurações dinâmicas
+        const AppConfig = {
+            FEATURES: {{ config.FEATURES | tojson | safe }},
+            CELL_TYPES: {{ config.CELL_TYPES | tojson | safe }}
+        };
+    </script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

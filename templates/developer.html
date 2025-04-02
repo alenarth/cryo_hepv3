@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Área do Desenvolvedor - CrioAI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">CrioAI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Simulador</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/developer">Desenvolvedor</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row">
+            <!-- Painel de Controle -->
+            <div class="col-md-3 mb-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Configurações do Modelo</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo Celular:</label>
+                            <select id="modelSelector" class="form-select">
+                                {% for ct in config.CELL_TYPES %}
+                                <option value="{{ ct }}">{{ ct | upper }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="alert alert-info">
+                            <small>Selecione o modelo para visualizar suas métricas e gráficos de desempenho</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conteúdo Principal -->
+            <div class="col-md-9">
+                <!-- Seção Métricas -->
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">📊 Métricas de Desempenho</h4>
+                        <div id="metrics" class="metrics-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Gráfico 1 -->
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">🔍 Valores Reais vs. Previstos</h4>
+                        <div class="plot-container" id="realVsPredictedPlot"></div>
+                        <div class="alert alert-info mt-3">
+                            <strong>Interpretação:</strong> Pontos próximos à linha vermelha indicam previsões precisas.
+                            Dispersão excessiva sugere oportunidades para melhorar o modelo.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico 2 -->
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">📈 Impacto das Variáveis (SHAP)</h4>
+                        <div class="plot-container" id="shapImpactPlot"></div>
+                        <div class="alert alert-info mt-3">
+                            <strong>Análise:</strong> Variáveis com maiores valores absolutos têm maior impacto nas previsões.
+                            Valores positivos aumentam a viabilidade, negativos reduzem.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico 3 -->
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h4 class="card-title">📉 Distribuição de Erros</h4>
+                        <div class="plot-container" id="errorDistributionPlot"></div>
+                        <div class="alert alert-info mt-3">
+                            <strong>Padrão Ideal:</strong> Distribuição normal centrada em zero indica bons resultados.
+                            Assimetrias sugerem viés nas previsões.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/developer.js"></script>
+</body>
+</html>
