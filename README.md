@@ -3,7 +3,7 @@
 
 ---
 
-## Overview  
+## Sobre 
 Otimizador de Criopreservação de Hepatócitos é uma plataforma integrada que combina técnicas avançadas de machine learning com conhecimentos de criobiologia para prever e otimizar protocolos de preservação celular. Desenvolvido para pesquisadores médicos e técnicos de laboratório, o sistema utiliza modelos XGBoost treinados em dados experimentais históricos para determinar combinações ideais de crioprotetores, maximizando a viabilidade celular pós-congelamento.
 
 ---
@@ -24,27 +24,40 @@ Otimizador de Criopreservação de Hepatócitos é uma plataforma integrada que 
 
 2. **Setup**:  
 ```bash
-git clone https://github.com/seu-usuario/cryocell-predictor.git
-cd cryocell-predictor
+git clone https://github.com/alenarth/cryo_hepv3.git
 python -m venv venv
 source venv/bin/activate  # Linux/MacOS
 venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
+
 3. **Preparação de Dados**:
+   - Coloque os arquivos CSV em data/raw/
+   - Formato requerido: hepg2.csv, rat.csv, mice.csv
 
-Coloque os arquivos CSV em data/raw/
-
-Formato requerido: hepg2.csv, rat.csv, mice.csv
-
-Train Models:
-
-bash
-Copy
+4. **Treinar o Modelo novamente**:
+```bash
 python train_models.py
-Run Application:
+```
 
-bash
-Copy
+5. **Rodar o App**:
+```bash
 python app.py
+```
 Acesse: http://localhost:5000
+
+## Utilização 
+**Interface Principal.**
+1. Selecione a linhagem celular (HEPG2, Rat, Mice)
+2. Ajuste as concentrações usando os sliders (passos de 5%)
+3. Visualize:
+   - Viabilidade prevista em tempo real
+   - Curva ótima de concentração
+   - Impacto individual de cada crioprotetor
+
+## Área do Desenvolvedor
+Acesse via navbar: http://localhost:5000/developer
+Analise:
+   - Desempenho dos modelos (RMSE, R²)
+   - Distribuição de erros
+   - Gráficos de importância de features
