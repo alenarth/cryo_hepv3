@@ -4,8 +4,7 @@ let currentData = null;
 async function updatePlot() {
     const payload = {
         cell_type: document.getElementById('cellType').value,
-        cryoprotector: document.getElementById('cryoprotector').value,
-        concentration: document.getElementById('concentration').value
+        cryoprotector: document.getElementById('cryoprotector').value
     };
 
     try {
