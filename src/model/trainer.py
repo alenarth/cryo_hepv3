@@ -6,7 +6,12 @@ from config import Config
 from src.data.loader import load_raw_data
 
 class CryoModelTrainer:
-    def __init__(self, cell_type: str):
+    def __init__(self, cell_type: str) -> None:
+        """
+        Inicializa o treinador para o tipo celular.
+        Args:
+            cell_type (str): Nome do tipo celular.
+        """
         self.cell_type = cell_type
         self.model = XGBRegressor(
             objective='reg:squarederror',
@@ -18,6 +23,13 @@ class CryoModelTrainer:
         )
 
     def prepare_data(self, df: pd.DataFrame) -> tuple:
+        """
+        Prepara os dados para treinamento.
+        Args:
+            df (pd.DataFrame): DataFrame bruto.
+        Returns:
+            tuple: X_train, X_test, y_train, y_test
+        """
         """Preparação rigorosa dos dados"""
         # Converter e filtrar
         for col in Config.FEATURES + [Config.TARGET]:
@@ -34,7 +46,12 @@ class CryoModelTrainer:
             random_state=42
         )
     
-    def train_and_save(self):
+    def train_and_save(self) -> None:
+        """
+        Executa o fluxo completo de treinamento e salva o modelo.
+        Raises:
+            Exception: Se ocorrer erro no treinamento.
+        """
         """Fluxo completo de treinamento"""
         try:
             df = load_raw_data(self.cell_type)

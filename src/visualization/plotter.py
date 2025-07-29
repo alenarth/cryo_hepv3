@@ -4,10 +4,19 @@ import numpy as np
 import pandas as pd
 import shap
 from sklearn.metrics import mean_squared_error, r2_score
-import joblib
 from config import Config
 
-def generate_model_analysis(model, X_test, y_test, cell_type: str):
+def generate_model_analysis(model: object, X_test: pd.DataFrame, y_test: pd.Series, cell_type: str) -> None:
+    """
+    Gera análise do modelo e salva gráficos e métricas em HTML.
+    Args:
+        model (object): Modelo treinado.
+        X_test (pd.DataFrame): Dados de teste.
+        y_test (pd.Series): Valores reais.
+        cell_type (str): Tipo celular.
+    Returns:
+        None
+    """
     """Gera análise completa do modelo"""
     # Criar diretório específico para o tipo celular
     graph_dir = Config.GRAPHS_DIR / cell_type

@@ -1,9 +1,17 @@
 import pandas as pd
-from pathlib import Path
 from config import Config
 
 def load_raw_data(cell_type: str) -> pd.DataFrame:
-    """Carrega dados com validação rigorosa"""
+    """
+    Carrega dados brutos do tipo celular informado.
+    Args:
+        cell_type (str): Nome do tipo celular.
+    Returns:
+        pd.DataFrame: DataFrame validado com os dados.
+    Raises:
+        FileNotFoundError: Se o arquivo não existir.
+        ValueError: Se colunas obrigatórias estiverem faltando.
+    """
     file_path = Config.RAW_DATA_DIR / f"{cell_type}.csv"
     
     if not file_path.exists():
