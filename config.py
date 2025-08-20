@@ -10,7 +10,7 @@ class Config:
     RAW_DATA_DIR = BASE_DIR / "data" / "raw"
     PROCESSED_DATA_DIR = BASE_DIR / "data" / "processed"
     MODELS_DIR = BASE_DIR / "models"
-    GRAPHS_DIR = BASE_DIR / "output" / "graphs"
+    GRAPHS_DIR = BASE_DIR / "static" / "graphs"
     
     # Colunas do dataset (corrigido espaços)
     FEATURES = ['% DMSO', 'TREHALOSE', 'GLICEROL', 'SACAROSE', 'GLICOSE']
@@ -25,4 +25,4 @@ class Config:
     os.makedirs(RAW_DATA_DIR, exist_ok=True)
     os.makedirs(PROCESSED_DATA_DIR, exist_ok=True)
     os.makedirs(MODELS_DIR, exist_ok=True)
-    os.makedirs(GRAPHS_DIR, exist_ok=True)
+    # os.makedirs(GRAPHS_DIR, exist_ok=True)  # Não necessário, pois static/graphs já existe

@@ -54,42 +54,77 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <h4 class="card-title">📊 Métricas de Desempenho</h4>
-                        <div id="metrics" class="metrics-grid"></div>
+                        <iframe id="metricsFrame" src="/static/graphs/{{ selected_cell_type }}/metrics.html" width="100%" height="120" style="border:none;"></iframe>
                     </div>
                 </div>
 
-                <!-- Gráfico 1 -->
+                <!-- Gráficos Avançados -->
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <h4 class="card-title">🔍 Valores Reais vs. Previstos</h4>
-                        <div class="plot-container" id="realVsPredictedPlot"></div>
+                        <iframe id="realVsPredictedFrame" src="/static/graphs/{{ selected_cell_type }}/real_vs_predicted.html" width="100%" height="400" style="border:none;"></iframe>
                         <div class="alert alert-info mt-3">
-                            <strong>Interpretação:</strong> Pontos próximos à linha vermelha indicam previsões precisas.
-                            Dispersão excessiva sugere oportunidades para melhorar o modelo.
+                            <strong>Interpretação:</strong> Pontos próximos à linha vermelha indicam previsões precisas. Dispersão excessiva sugere oportunidades para melhorar o modelo.
                         </div>
                     </div>
                 </div>
 
-                <!-- Gráfico 2 -->
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <h4 class="card-title">📈 Impacto das Variáveis (SHAP)</h4>
-                        <div class="plot-container" id="shapImpactPlot"></div>
+                        <iframe id="shapImpactFrame" src="/static/graphs/{{ selected_cell_type }}/shap_importance.html" width="100%" height="400" style="border:none;"></iframe>
                         <div class="alert alert-info mt-3">
-                            <strong>Análise:</strong> Variáveis com maiores valores absolutos têm maior impacto nas previsões.
-                            Valores positivos aumentam a viabilidade, negativos reduzem.
+                            <strong>Análise:</strong> Variáveis com maiores valores absolutos têm maior impacto nas previsões. Valores positivos aumentam a viabilidade, negativos reduzem.
                         </div>
                     </div>
                 </div>
 
-                <!-- Gráfico 3 -->
-                <div class="card shadow">
+                <div class="card shadow mb-4">
                     <div class="card-body">
                         <h4 class="card-title">📉 Distribuição de Erros</h4>
-                        <div class="plot-container" id="errorDistributionPlot"></div>
+                        <iframe id="errorDistributionFrame" src="/static/graphs/{{ selected_cell_type }}/error_distribution.html" width="100%" height="400" style="border:none;"></iframe>
                         <div class="alert alert-info mt-3">
-                            <strong>Padrão Ideal:</strong> Distribuição normal centrada em zero indica bons resultados.
-                            Assimetrias sugerem viés nas previsões.
+                            <strong>Padrão Ideal:</strong> Distribuição normal centrada em zero indica bons resultados. Assimetrias sugerem viés nas previsões.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">🧬 SHAP Summary Plot</h4>
+                        <img id="shapSummaryImg" src="/static/graphs/{{ selected_cell_type }}/shap_summary.png" class="img-fluid" alt="SHAP Summary">
+                        <div class="alert alert-info mt-3">
+                            <strong>Explicação:</strong> Cada ponto representa uma amostra. Cores indicam valores das variáveis. Permite entender o impacto individual de cada feature.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">� Curva de Aprendizado</h4>
+                        <img id="learningCurveImg" src="/static/graphs/{{ selected_cell_type }}/learning_curve.png" class="img-fluid" alt="Curva de Aprendizado">
+                        <div class="alert alert-info mt-3">
+                            <strong>Explicação:</strong> Mostra se o modelo está sofrendo underfitting ou overfitting conforme aumenta o número de amostras de treino.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">⚙️ Curva de Validação (max_depth)</h4>
+                        <img id="validationCurveImg" src="/static/graphs/{{ selected_cell_type }}/validation_curve.png" class="img-fluid" alt="Curva de Validação">
+                        <div class="alert alert-info mt-3">
+                            <strong>Explicação:</strong> Avalia o impacto do hiperparâmetro max_depth no desempenho do modelo.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">🔬 Residual Plot</h4>
+                        <img id="residualPlotImg" src="/static/graphs/{{ selected_cell_type }}/residual_plot.png" class="img-fluid" alt="Residual Plot">
+                        <div class="alert alert-info mt-3">
+                            <strong>Explicação:</strong> Permite identificar padrões nos erros de predição. Resíduos próximos de zero indicam boa performance.
                         </div>
                     </div>
                 </div>
@@ -98,6 +133,22 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/developer.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selector = document.getElementById('modelSelector');
+        selector.value = "{{ selected_cell_type }}";
+        selector.addEventListener('change', function() {
+            const ct = selector.value;
+            document.getElementById('metricsFrame').src = `/static/graphs/${ct}/metrics.html`;
+            document.getElementById('realVsPredictedFrame').src = `/static/graphs/${ct}/real_vs_predicted.html`;
+            document.getElementById('shapImpactFrame').src = `/static/graphs/${ct}/shap_importance.html`;
+            document.getElementById('errorDistributionFrame').src = `/static/graphs/${ct}/error_distribution.html`;
+            document.getElementById('shapSummaryImg').src = `/static/graphs/${ct}/shap_summary.png`;
+            document.getElementById('learningCurveImg').src = `/static/graphs/${ct}/learning_curve.png`;
+            document.getElementById('validationCurveImg').src = `/static/graphs/${ct}/validation_curve.png`;
+            document.getElementById('residualPlotImg').src = `/static/graphs/${ct}/residual_plot.png`;
+        });
+    });
+    </script>
 </body>
 </html>

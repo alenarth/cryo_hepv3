@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             // Carregar métricas
-            const metricsResponse = await fetch(`/graphs/${cellType}/metrics.html`);
+            const metricsResponse = await fetch(`/static/graphs/${cellType}/metrics.html`);
             document.getElementById('metrics').innerHTML = await metricsResponse.text();
 
             // Carregar gráficos
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadPlot(cellType, plotName, containerId) {
         try {
-            const response = await fetch(`/model-analysis/${cellType}/${plotName}`);
+            const response = await fetch(`/static/graphs/${cellType}/${plotName}.html`);
             const html = await response.text();
             
             // Usar iframe para renderização confiável

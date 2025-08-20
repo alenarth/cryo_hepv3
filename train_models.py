@@ -2,7 +2,6 @@ from src.model.trainer import CryoModelTrainer
 from src.visualization.plotter import generate_model_analysis
 from config import Config
 import joblib
-import os
 
 def train_all_models():
     """Treina e salva modelos para todos os tipos celulares com análise completa"""
@@ -56,7 +55,7 @@ def train_all_models():
 if __name__ == "__main__":
     # Garantir diretórios existem
     Config.MODELS_DIR.mkdir(exist_ok=True)
-    Config.GRAPHS_DIR.mkdir(exist_ok=True)
+    # Config.GRAPHS_DIR.mkdir(exist_ok=True)  # Não necessário, pasta já existe
     
     print("Iniciando treinamento de modelos...")
     train_all_models()
