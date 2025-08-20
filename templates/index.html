@@ -4,30 +4,42 @@
     <title>CryHepAI</title>
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="/">CryHepAI</a>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/">Simulador de Viabilidade</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/developer">Área de Desenvolvedor</a>
-                </li>
-            </ul>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="https://www.fiocruz.br/images/fiocruz_logo_branco.png" alt="Fiocruz" height="32" style="margin-right:8px;">
+                CryHepAI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Simulador de Viabilidade</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/developer">Área de Desenvolvedor</a>
+                    </li>
+                </ul>
+                <button class="btn btn-outline-light ms-3" data-bs-toggle="modal" data-bs-target="#helpModal">
+                    <i class="fas fa-question-circle"></i> Ajuda
+                </button>
+            </div>
         </div>
     </nav>
 
     <div class="main-container">
-        <h2 class="mb-4">Simulador de Viabilidade Celular Pós-Criopreservação</h2>
+    <h2 class="mb-4"><i class="fas fa-vials"></i> Simulador de Viabilidade Celular Pós-Criopreservação</h2>
         
         <div class="row g-4">
             <!-- Painel de Controle -->
             <div class="col-md-4">
-                <div class="control-panel">
+                <div class="control-panel shadow">
                     <div class="mb-3">
                         <label class="form-label">Tipo Celular:</label>
                         <select id="cellType" class="form-select">
@@ -78,18 +90,26 @@
 
             <!-- Gráfico -->
             <div class="col-md-8">
-                <div class="graph-container p-3">
-                    <div id="viabilityPlot"></div>
+                <div class="graph-container p-3 position-relative">
+                    <div class="d-flex justify-content-end mb-2">
+                        <button id="downloadPlotBtn" class="btn btn-download" style="display:none;"><i class="fas fa-download"></i> Baixar Gráfico</button>
+                    </div>
+                    <div id="viabilityPlot" style="min-height:400px;"></div>
+                    <div id="plotSpinner" class="spinner-overlay d-none">
+                        <div class="d-flex justify-content-center align-items-center w-100 h-100">
+                            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="info-section py-5" style="background: #f8f9fa;">
+    <div class="info-section py-5">
         <div class="container">
             <div class="card shadow">
                 <div class="card-body">
-                    <h3 class="card-title mb-4">Como Funciona</h3>
+                    <h3 class="card-title mb-4"><i class="fas fa-info-circle"></i> Como Funciona</h3>
                     <div class="row">
                         <div class="col-md-6">
                             <p class="lead">
@@ -102,8 +122,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="alert alert-info">
-                                <h5>Instruções Rápidas:</h5>
-                                <ol>
+                                <h5><i class="fas fa-lightbulb"></i> Instruções Rápidas:</h5>
+                                <ol class="mb-0">
                                     <li>Selecione o tipo celular</li>
                                     <li>Escolha o crioprotetor</li>
                                     <li>Ajuste a concentração</li>
@@ -117,6 +137,8 @@
         </div>
     </div>
 
+    {% include '_help_modal.html' %}
+    {% include '_footer.html' %}
     <script>
         // Configurações dinâmicas
         const AppConfig = {
@@ -125,5 +147,6 @@
         };
     </script>
     <script src="/static/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

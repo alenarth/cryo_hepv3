@@ -1,3 +1,7 @@
+function showSpinner(containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '<div class="d-flex justify-content-center align-items-center" style="height:300px;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
+}
 document.addEventListener('DOMContentLoaded', () => {
     const modelSelector = document.getElementById('modelSelector');
     let currentPlots = {};
@@ -22,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadPlot(cellType, plotName, containerId) {
         try {
+            showSpinner(containerId);
             const response = await fetch(`/static/graphs/${cellType}/${plotName}.html`);
             const html = await response.text();
-            
             // Usar iframe para renderização confiável
             const container = document.getElementById(containerId);
             container.innerHTML = `
@@ -32,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     srcdoc="${html.replace(/"/g, '&quot;')}" 
                     style="width: 100%; height: 500px; border: none;"
                 ></iframe>
+                <button class='btn btn-download mt-2' onclick="downloadGraph('${cellType}','${plotName}')"><i class='fas fa-download'></i> Baixar Gráfico</button>
             `;
-
         } catch (error) {
             console.error(`Erro no gráfico ${plotName}:`, error);
             document.getElementById(containerId).innerHTML = `
@@ -42,6 +46,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         }
+window.downloadGraph = function(cellType, plotName) {
+    const url = `/static/graphs/${cellType}/${plotName}.png`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${plotName}_${cellType}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
     }
 
     function showErrorAlert() {

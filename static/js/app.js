@@ -1,3 +1,12 @@
+// Spinner overlay control
+function showSpinner() {
+    document.getElementById('plotSpinner').classList.remove('d-none');
+    document.getElementById('downloadPlotBtn').style.display = 'none';
+}
+
+function hideSpinner() {
+    document.getElementById('plotSpinner').classList.add('d-none');
+}
 
 let currentPlot = null;
 let currentData = null;
@@ -20,6 +29,7 @@ async function updatePlot() {
         cell_type: document.getElementById('cellType').value,
         cryoprotector: document.getElementById('cryoprotector').value
     };
+    showSpinner();
     try {
         const response = await fetch('/predict', {
             method: 'POST',
@@ -29,6 +39,7 @@ async function updatePlot() {
         currentData = await response.json();
         if(currentData.error) {
             alert('Erro: ' + currentData.error);
+            hideSpinner();
             return;
         }
         const trace = {
@@ -44,18 +55,29 @@ async function updatePlot() {
             xaxis: { title: 'Concentração (%)', gridcolor: '#f0f0f0' },
             yaxis: { title: 'Viabilidade (%)', range: [0, 100] },
             plot_bgcolor: 'white',
-            paper_bgcolor: 'white'
+            paper_bgcolor: 'white',
+            autosize: true,
+            margin: { t: 60, r: 30, l: 60, b: 60 }
         };
-        if(currentPlot) {
-            Plotly.react('viabilityPlot', [trace], layout);
-        } else {
-            currentPlot = Plotly.newPlot('viabilityPlot', [trace], layout);
-        }
+        Plotly.newPlot('viabilityPlot', [trace], layout, {responsive: true, displayModeBar: false}).then(() => {
+            hideSpinner();
+            document.getElementById('downloadPlotBtn').style.display = 'inline-block';
+        });
         document.getElementById('optConc').textContent = currentData.optimal.concentration;
         document.getElementById('optViab').textContent = currentData.optimal.value;
     } catch (error) {
+        hideSpinner();
         console.error('Erro:', error);
     }
+// Download button handler
+document.addEventListener('DOMContentLoaded', () => {
+    const downloadBtn = document.getElementById('downloadPlotBtn');
+    if (downloadBtn) {
+        downloadBtn.onclick = function() {
+            Plotly.downloadImage('viabilityPlot', {format: 'png', filename: 'grafico_viabilidade'});
+        };
+    }
+});
 }
 
 async function calculateSpecificViability() {
