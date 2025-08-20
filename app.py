@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import joblib
 import pandas as pd
@@ -10,7 +9,7 @@ import os
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_swagger_ui import get_swaggerui_blueprint
-from marshmallow import Schema, fields, ValidationError
+from marshmallow import Schema, fields, ValidationError, validates_schema
 
 CONCENTRATION_RANGES = {
     'DMSO': list(range(0, 101, 5)),
@@ -47,7 +46,85 @@ class PredictSchema(Schema):
 class SpecificPredictSchema(PredictSchema):
     concentration = fields.Float(required=True)
 
+
+# --- Schemas para mistura ---
+class MixtureCryoprotectantSchema(Schema):
+    cryoprotector = fields.Str(required=True)
+    concentration = fields.Float(required=True)
+
+
+class MixturePredictSchema(Schema):
+    cell_type = fields.Str(required=True)
+    mixture = fields.List(fields.Nested(MixtureCryoprotectantSchema), required=True, validate=lambda lst: 2 <= len(lst) <= 5)
+
+    @validates_schema
+    def validate_cryoprotectors(self, data, **kwargs):
+        cps = [item['cryoprotector'].upper() for item in data.get('mixture', [])]
+        if len(set(cps)) != len(cps):
+            raise ValidationError('Não repita crioprotetores na mistura.')
+        for cp in cps:
+            if cp not in VALID_CRYOPROTECTORS:
+                raise ValidationError(f'Crioprotetor inválido: {cp}')
+
 # --- Auxiliares ---
+@app.route('/mixture')
+def mixture_page():
+    """Página de mistura de crioprotetores."""
+    return render_template('mixture.html', config=Config)
+
+
+@app.route('/predict-mixture', methods=['POST'])
+@limiter.limit("30/minute")
+def predict_mixture():
+    """Prediz viabilidade para uma mistura de crioprotetores."""
+    try:
+        data = request.json
+
+        # Validação de schema e quantidade de crioprotetores
+        try:
+            MixturePredictSchema().load(data)
+        except ValidationError as ve:
+            return jsonify({'errors': ve.messages}), 400
+        cell_type = data['cell_type'].lower()
+        mixture = data['mixture']
+        errors = []
+        if cell_type not in VALID_CELL_TYPES:
+            errors.append(f"Tipo celular inválido: {cell_type}")
+        if len(mixture) < 2:
+            errors.append("Adicione pelo menos 2 crioprotetores.")
+        if errors:
+            return jsonify({'errors': errors}), 400
+
+        # Mapeamento robusto dos crioprotetores para as features do modelo
+        feature_map = {
+            'DMSO': '% DMSO',
+            'TREHALOSE': 'TREHALOSE',
+            'GLICEROL': 'GLICEROL',
+            'SACAROSE': 'SACAROSE',
+            'GLICOSE': 'GLICOSE'
+        }
+        input_dict = {feat: 0 for feat in feature_map.values()}
+        for item in mixture:
+            cp_raw = item['cryoprotector']
+            cp = str(cp_raw).strip().upper()
+            if cp not in feature_map:
+                return jsonify({'errors': [f"Crioprotetor inválido: {cp_raw}"]}), 400
+            conc = float(item['concentration'])
+            input_dict[feature_map[cp]] = conc
+
+        input_data = pd.DataFrame([input_dict])
+        model = get_model(cell_type)
+        predicted_drop = model.predict(input_data)[0]
+        viability = float(round(max(0, min(100, 100 - predicted_drop)), 1))
+        return jsonify({
+            'viability': viability,
+            'input': input_dict
+        })
+    except ValidationError as ve:
+        return jsonify({'errors': ve.messages}), 400
+    except Exception as e:
+        logging.error(f"Erro interno na mistura: {str(e)}")
+        return jsonify({'error': 'Erro interno ao prever mistura.', 'details': str(e)}), 500
 
 VALID_CELL_TYPES = {'hepg2', 'mice', 'rat'}
 VALID_CRYOPROTECTORS = {'DMSO', 'TREHALOSE', 'GLICEROL', 'SACAROSE', 'GLICOSE'}

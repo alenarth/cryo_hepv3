@@ -279,13 +279,17 @@ body {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 20px;
-    margin-top: 70px;
+    margin-top: 90px;
     background: white;
     border-radius: 15px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    transform: translateY(-50px);
     position: relative;
     z-index: 1;
+}
+
+/* Ajuste específico para a página index para reduzir o espaço abaixo da navbar */
+.main-container.index-main {
+    margin-top: 60px;
 }
 
 .graph-container {

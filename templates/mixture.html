@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Mistura de Crioprotetores</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="https://www.fiocruz.br/images/fiocruz_logo_branco.png" alt="Fiocruz" height="32" style="margin-right:8px;">
+                CryHepAI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Simulador de Viabilidade</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/mixture">Mistura de Crioprotetores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/developer">Área de Desenvolvedor</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container main-container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow p-4">
+                    <h2 class="mb-4 text-center"><i class="fas fa-flask"></i> Mistura de Crioprotetores</h2>
+                    <form id="mixture-form" class="mb-3">
+                        <div class="row g-3 align-items-end mb-2">
+                            <div class="col-md-5">
+                                <label class="form-label">Tipo Celular:</label>
+                                <select id="cell_type" class="form-select">
+                                    {% for ct in config.CELL_TYPES %}
+                                    <option value="{{ ct }}">{{ ct|upper }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label">Crioprotetores e Concentrações:</label>
+                                <div id="mixture-inputs"></div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="addCryoprotectant()"><i class="fas fa-plus"></i> Adicionar Crioprotetor</button>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-check"></i> Prever Viabilidade</button>
+                        </div>
+                    </form>
+                    <div id="result" class="alert alert-info text-center" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let mixtureCount = 0;
+        function addCryoprotectant() {
+            if (mixtureCount >= 5) return;
+            const div = document.createElement('div');
+            div.className = 'row g-2 align-items-center mb-2';
+            div.innerHTML = `
+                <div class="col-5 col-md-4">
+                    <select name="cryoprotector" class="form-select">
+                        <option value="DMSO">DMSO</option>
+                        <option value="TREHALOSE">TREHALOSE</option>
+                        <option value="GLICEROL">GLICEROL</option>
+                        <option value="SACAROSE">SACAROSE</option>
+                        <option value="GLICOSE">GLICOSE</option>
+                    </select>
+                </div>
+                <div class="col-5 col-md-4">
+                    <input type="number" name="concentration" class="form-control" step="0.01" min="0" max="100" placeholder="Concentração (%)" required>
+                </div>
+                <div class="col-2 col-md-4">
+                    <button type="button" class="btn btn-danger btn-sm w-100" onclick="this.closest('.row').remove(); mixtureCount--;">Remover</button>
+                </div>
+            `;
+            document.getElementById('mixture-inputs').appendChild(div);
+            mixtureCount++;
+        }
+        document.getElementById('mixture-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const cell_type = document.getElementById('cell_type').value;
+            const mixture = [];
+            document.querySelectorAll('#mixture-inputs > div').forEach(div => {
+                const cp = div.querySelector('select').value;
+                const conc = div.querySelector('input').value;
+                mixture.push({cryoprotector: cp, concentration: parseFloat(conc)});
+            });
+            const resultDiv = document.getElementById('result');
+            if (mixture.length < 2) {
+                resultDiv.className = 'alert alert-warning';
+                resultDiv.innerText = 'Adicione pelo menos 2 crioprotetores.';
+                resultDiv.style.display = '';
+                return;
+            }
+            resultDiv.className = 'alert alert-info';
+            resultDiv.innerText = 'Calculando...';
+            resultDiv.style.display = '';
+            try {
+                const resp = await fetch('/predict-mixture', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({cell_type, mixture})
+                });
+                const data = await resp.json();
+                if (data.viability !== undefined) {
+                    resultDiv.className = 'alert alert-success';
+                    resultDiv.innerText = `Viabilidade prevista: ${data.viability}%`;
+                } else if (data.errors) {
+                    resultDiv.className = 'alert alert-danger';
+                    resultDiv.innerText = data.errors.join(', ');
+                } else {
+                    resultDiv.className = 'alert alert-danger';
+                    resultDiv.innerText = 'Erro ao prever.';
+                }
+            } catch (err) {
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.innerText = 'Erro de conexão.';
+            }
+        };
+        // Adiciona 2 campos por padrão
+        addCryoprotectant(); addCryoprotectant();
+    </script>
+</body>
+</html>
