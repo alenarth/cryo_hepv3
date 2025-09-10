@@ -69,16 +69,17 @@ async function updatePlot() {
         hideSpinner();
         console.error('Erro:', error);
     }
-// Download button handler
+}
+
+// Download button handler (fora da função updatePlot)
 document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.getElementById('downloadPlotBtn');
     if (downloadBtn) {
         downloadBtn.onclick = function() {
-            Plotly.downloadImage('viabilityPlot', {format: 'png', filename: 'grafico_viabilidade'});
+            Plotly.downloadImage(document.getElementById('viabilityPlot'), {format: 'png', filename: 'grafico_viabilidade'});
         };
     }
 });
-}
 
 async function calculateSpecificViability() {
     const conc = document.getElementById('concentration').value;

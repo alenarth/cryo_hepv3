@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <img src="https://www.fiocruz.br/images/fiocruz_logo_branco.png" alt="Fiocruz" height="32" style="margin-right:8px;">
+                <img src="static/images/fiocruz-1-removebg-preview.png" alt="Fiocruz" height="32" style="margin-right:8px;">
                 CryHepAI
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -29,6 +29,9 @@
                         <a class="nav-link" href="/developer">Área de Desenvolvedor</a>
                     </li>
                 </ul>
+                <button class="btn btn-outline-light ms-3" data-bs-toggle="modal" data-bs-target="#helpModal">
+                    <i class="fas fa-question-circle"></i> Ajuda
+                </button>
             </div>
         </div>
     </nav>
@@ -133,5 +136,7 @@
         // Adiciona 2 campos por padrão
         addCryoprotectant(); addCryoprotectant();
     </script>
+    {% include '_help_modal.html' %}
+    {% include '_footer.html' %}
 </body>
 </html>
