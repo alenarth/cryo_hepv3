@@ -186,9 +186,6 @@ def developer_area() -> str:
     selected_cell_type = Config.CELL_TYPES[0] if Config.CELL_TYPES else ''
     return render_template('developer.html', config=Config, selected_cell_type=selected_cell_type)
 
-
-
-
 @app.route('/predict', methods=['POST'])
 @limiter.limit("30/minute")
 
