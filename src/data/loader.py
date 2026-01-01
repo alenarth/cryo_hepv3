@@ -17,12 +17,18 @@ def load_raw_data(cell_type: str) -> pd.DataFrame:
     if not file_path.exists():
         raise FileNotFoundError(f"Arquivo {cell_type}.csv não encontrado")
     
+    def _safe_float(x):
+        s = str(x).replace('%','').replace(',','.').strip()
+        if s == '' or s.lower() == 'nan':
+            return float('nan')
+        return float(s)
+
     df = pd.read_csv(
         file_path,
         decimal=',',
         thousands='.',
         converters={
-            col: lambda x: float(str(x).replace('%','').replace(',','.').strip())
+            col: _safe_float
             for col in Config.FEATURES + [Config.TARGET]
         }
     )

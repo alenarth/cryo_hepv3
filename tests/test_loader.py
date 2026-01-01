@@ -4,7 +4,9 @@ from src.data.loader import load_raw_data
 def test_load_raw_data_valid():
     df = load_raw_data('hepg2')
     assert not df.empty
-    assert all(col in df.columns for col in ['% DMSO', 'TREHALOSE', 'GLICEROL', 'SACAROSE', 'GLICOSE', 'DROP'])
+    from config import Config
+    expected = Config.FEATURES + [Config.TARGET]
+    assert all(col in df.columns for col in expected)
 
 def test_load_raw_data_missing_file():
     with pytest.raises(FileNotFoundError):

@@ -127,35 +127,10 @@ Acesse em: [http://localhost:5000](http://localhost:5000)
 ## Uso
 
 - **Simulador de Viabilidade:** Escolha tipo celular, crioprotetor e concentração para visualizar curva e ponto ótimo.
-- **Mistura de Crioprotetores:** Adicione 2 a 5 crioprotetores, defina concentrações e obtenha a viabilidade prevista.
+- **Mistura de Crioprotetores:** Adicione 2 crioprotetores, defina concentrações e obtenha a viabilidade prevista.
 - **Área do Desenvolvedor:** Visualize métricas, gráficos de explicabilidade e análise de erros dos modelos.
 
----
-
-## Testes
-
-Execute os testes unitários com:
-
-```bash
-pytest tests/
-```
-
----
-
-## Especificações Avançadas
-
-- **Arquitetura Modular:** Separação clara entre backend, lógica de ML, visualização e frontend.
-- **Explicabilidade:** SHAP para análise de impacto de cada feature na predição.
-- **Curvas de Aprendizado e Validação:** Geração automática para cada modelo.
-- **Interface Responsiva:** Totalmente adaptada para desktop e mobile.
-- **Extensibilidade:** Fácil inclusão de novos tipos celulares ou crioprotetores via configuração.
-
----
 
 ## Licença
 
 MIT. Veja o arquivo `LICENSE.md`.
-
----
-
-Se quiser incluir exemplos de uso da API, prints ou fluxogramas, posso complementar!

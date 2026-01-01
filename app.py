@@ -113,7 +113,11 @@ def predict_mixture():
             input_dict[feature_map[cp]] = conc
 
         input_data = pd.DataFrame([input_dict])
-        model = get_model(cell_type)
+        try:
+            model = get_model(cell_type)
+        except FileNotFoundError as fe:
+            logging.warning(str(fe))
+            return jsonify({'error': str(fe)}), 404
         predicted_drop = model.predict(input_data)[0]
         viability = float(round(max(0, min(100, 100 - predicted_drop)), 1))
         return jsonify({
@@ -137,10 +141,37 @@ def validate_input(cell_type: str, cryoprotector: str) -> list[str]:
         errors.append(f"Crioprotetor inválido: {cryoprotector}")
     return errors
 
+
+def build_feature_row(cryoprotector: str, concentration: float) -> dict:
+    """Return a feature dict matching the model feature names for a given crioprotetor and concentration."""
+    cryo = cryoprotector.upper()
+    return {
+        '% DMSO': concentration if cryo == 'DMSO' else 0,
+        'TREHALOSE': concentration if cryo == 'TREHALOSE' else 0,
+        'GLICEROL': concentration if cryo == 'GLICEROL' else 0,
+        'SACAROSE': concentration if cryo == 'SACAROSE' else 0,
+        'GLICOSE': concentration if cryo == 'GLICOSE' else 0
+    }
+
 # Cache simples para modelos
 @lru_cache(maxsize=8)
 def get_model(cell_type: str):
-    return joblib.load(MODELS_DIR / f"xgboost_{cell_type}.pkl")
+    """Carrega o modelo para o tipo celular dado com tratamento de erros.
+
+    Normaliza o `cell_type` para lowercase para consistência e retorna erros
+    claros quando o arquivo de modelo não existir ou falhar ao carregar.
+    """
+    cell_type = str(cell_type).lower()
+    if cell_type not in VALID_CELL_TYPES:
+        raise FileNotFoundError(f"Tipo celular inválido ou sem modelo: {cell_type}")
+    model_path = MODELS_DIR / f"xgboost_{cell_type}.pkl"
+    if not model_path.exists():
+        raise FileNotFoundError(f"Modelo não encontrado: {model_path}")
+    try:
+        return joblib.load(model_path)
+    except Exception as e:
+        logging.error(f"Erro ao carregar modelo {model_path}: {e}")
+        raise RuntimeError(f"Falha ao carregar o modelo: {e}") from e
 
 @app.route('/')
 def index() -> str:
@@ -173,17 +204,15 @@ def predict() -> object:
         if errors:
             logging.warning(f"Erro de entrada: {errors}")
             return jsonify({'errors': errors}), 400
-        model = get_model(cell_type)
+        try:
+            model = get_model(cell_type)
+        except FileNotFoundError as fe:
+            logging.warning(str(fe))
+            return jsonify({'error': str(fe)}), 404
         concentrations = CONCENTRATION_RANGES.get(cryoprotector, list(range(0, 101, 5)))
         viability = []
         for conc in concentrations:
-            input_data = pd.DataFrame([{
-                '% DMSO': conc if cryoprotector == 'DMSO' else 0,
-                'TREHALOSE': conc if cryoprotector == 'TREHALOSE' else 0,
-                'GLICEROL': conc if cryoprotector == 'GLICEROL' else 0,
-                'SACAROSE': conc if cryoprotector == 'SACAROSE' else 0,
-                'GLICOSE': conc if cryoprotector == 'GLICOSE' else 0
-            }])
+            input_data = pd.DataFrame([build_feature_row(cryoprotector, conc)])
             pred = 100 - model.predict(input_data)[0]
             viability.append(float(round(max(0, min(100, pred)), 1)))
         max_viab = max(viability)
@@ -232,14 +261,12 @@ def specific_predict() -> object:
         if errors:
             logging.warning(f"Erro de entrada: {errors}")
             return jsonify({'errors': errors}), 400
-        model = get_model(cell_type)
-        input_data = pd.DataFrame([{
-            '% DMSO': concentration if cryoprotector == 'DMSO' else 0,
-            'TREHALOSE': concentration if cryoprotector == 'TREHALOSE' else 0,
-            'GLICEROL': concentration if cryoprotector == 'GLICEROL' else 0,
-            'SACAROSE': concentration if cryoprotector == 'SACAROSE' else 0,
-            'GLICOSE': concentration if cryoprotector == 'GLICOSE' else 0
-        }])
+        try:
+            model = get_model(cell_type)
+        except FileNotFoundError as fe:
+            logging.warning(str(fe))
+            return jsonify({'error': str(fe)}), 404
+        input_data = pd.DataFrame([build_feature_row(cryoprotector, concentration)])
         predicted_drop = model.predict(input_data)[0]
         viability = float(round(max(0, min(100, 100 - predicted_drop)), 1))
         logging.info(f"Previsão específica: {cell_type}, {cryoprotector}, {concentration} -> {viability}")
@@ -259,6 +286,7 @@ def specific_predict() -> object:
 def model_metrics(cell_type: str) -> object:
     """Retorna métricas do modelo para o tipo celular."""
     try:
+        cell_type = cell_type.lower()
         if cell_type not in VALID_CELL_TYPES:
             return jsonify({'error': 'Tipo celular inválido.'}), 400
         model = get_model(cell_type)
@@ -275,17 +303,42 @@ def model_metrics(cell_type: str) -> object:
 
 @app.route('/graphs/<cell_type>/<path:filename>')
 def serve_cell_graphs(cell_type: str, filename: str) -> object:
-    """Serve arquivos de gráficos para cada tipo celular."""
-    return send_from_directory(Config.GRAPHS_DIR / cell_type, filename)
+    """Serve arquivos de gráficos para cada tipo celular.
+
+    Força cache_timeout=0 para evitar que navegadores sirvam versões desatualizadas
+    após novos treinamentos. Também normaliza o `cell_type`.
+    """
+    cell_type = cell_type.lower()
+    response = send_from_directory(GRAPHS_DIR / cell_type, filename, cache_timeout=0)
+    # Ensure no caching headers for immediate visibility
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
 
 
 @app.route('/model-analysis/<cell_type>/<graph_name>')
 def serve_model_analysis(cell_type: str, graph_name: str) -> object:
     """Serve análises dos modelos em HTML."""
-    return send_from_directory(
-        Config.GRAPHS_DIR / cell_type,
-        f"{graph_name}.html"
+    cell_type = cell_type.lower()
+    response = send_from_directory(
+        GRAPHS_DIR / cell_type,
+        f"{graph_name}.html",
+        cache_timeout=0
     )
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
+
+
+@app.route('/_debug/paths')
+def debug_paths():
+    """Endpoint simples para depuração: retorna os diretórios que a aplicação usa."""
+    return jsonify({
+        'config_models_dir': str(Config.MODELS_DIR),
+        'env_models_dir': str(MODELS_DIR),
+        'config_graphs_dir': str(Config.GRAPHS_DIR),
+        'env_graphs_dir': str(GRAPHS_DIR)
+    })
 
 
 if __name__ == '__main__':
