@@ -13,10 +13,7 @@ let currentData = null;
 let debounceTimeout = null;
 const CONCENTRATION_RANGES = {
     'DMSO': Array.from({length: 21}, (_, i) => i * 5),
-    'TREHALOSE': [0, 0.97, 1.94, 3.88, 7.77, 15.54, 31.08, 62.16, 100],
-    'GLICEROL': Array.from({length: 21}, (_, i) => i * 5),
-    'SACAROSE': Array.from({length: 21}, (_, i) => i * 5),
-    'GLICOSE': Array.from({length: 21}, (_, i) => i * 5),
+    'TREHALOSE': [0, 0.97, 1.94, 3.88, 7.77, 15.54, 31.08, 62.16, 100]
 };
 
 function updatePlotDebounced() {

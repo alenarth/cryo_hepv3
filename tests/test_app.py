@@ -4,7 +4,7 @@ from app import validate_input, get_model, app
 def test_validate_input_valid():
     assert validate_input('hepg2', 'DMSO') == []
     assert validate_input('mice', 'TREHALOSE') == []
-    assert validate_input('rat', 'GLICEROL') == []
+    assert validate_input('rat', 'TREHALOSE') == []
 
 def test_validate_input_invalid():
     assert 'Tipo celular inválido' in validate_input('foo', 'DMSO')[0]

@@ -13,8 +13,8 @@ class Config:
     GRAPHS_DIR = BASE_DIR / "static" / "graphs"
     
     # Colunas do dataset (corrigido espaços)
-    FEATURES = ['% DMSO', 'TREHALOSE', 'GLICEROL', 'SACAROSE', 'GLICOSE']
-    TARGET = '% QUEDA DA VIABILIDADE'
+    FEATURES = ['% DMSO', 'TREHALOSE']
+    TARGET = '% QUEDA DA VIABILIDADE' 
     
     # Configurações de validação
     ALLOWED_STEP = 5

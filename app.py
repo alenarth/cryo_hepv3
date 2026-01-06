@@ -13,11 +13,8 @@ from marshmallow import Schema, fields, ValidationError, validates_schema
 
 CONCENTRATION_RANGES = {
     'DMSO': list(range(0, 101, 5)),
-    'TREHALOSE': [0, 0.97, 1.94, 3.88, 7.77, 15.54, 31.08, 62.16, 100],
-    'GLICEROL': list(range(0, 101, 5)),
-    'SACAROSE': list(range(0, 101, 5)),
-    'GLICOSE': list(range(0, 101, 5)),
-}
+    'TREHALOSE': [0, 0.97, 1.94, 3.88, 7.77, 15.54, 31.08, 62.16, 100]
+} 
 
 
 # Configuração via ambiente
@@ -95,15 +92,12 @@ def predict_mixture():
         if errors:
             return jsonify({'errors': errors}), 400
 
-        # Mapeamento robusto dos crioprotetores para as features do modelo
+        # Mapeamento robusto dos crioprotetores para as features do modelo (apenas DMSO e TREHALOSE)
         feature_map = {
             'DMSO': '% DMSO',
-            'TREHALOSE': 'TREHALOSE',
-            'GLICEROL': 'GLICEROL',
-            'SACAROSE': 'SACAROSE',
-            'GLICOSE': 'GLICOSE'
+            'TREHALOSE': 'TREHALOSE'
         }
-        input_dict = {feat: 0 for feat in feature_map.values()}
+        input_dict = {feat: 0 for feat in feature_map.values()} 
         for item in mixture:
             cp_raw = item['cryoprotector']
             cp = str(cp_raw).strip().upper()
@@ -131,7 +125,7 @@ def predict_mixture():
         return jsonify({'error': 'Erro interno ao prever mistura.', 'details': str(e)}), 500
 
 VALID_CELL_TYPES = {'hepg2', 'mice', 'rat'}
-VALID_CRYOPROTECTORS = {'DMSO', 'TREHALOSE', 'GLICEROL', 'SACAROSE', 'GLICOSE'}
+VALID_CRYOPROTECTORS = {'DMSO', 'TREHALOSE'}
 
 def validate_input(cell_type: str, cryoprotector: str) -> list[str]:
     errors = []
@@ -147,10 +141,7 @@ def build_feature_row(cryoprotector: str, concentration: float) -> dict:
     cryo = cryoprotector.upper()
     return {
         '% DMSO': concentration if cryo == 'DMSO' else 0,
-        'TREHALOSE': concentration if cryo == 'TREHALOSE' else 0,
-        'GLICEROL': concentration if cryo == 'GLICEROL' else 0,
-        'SACAROSE': concentration if cryo == 'SACAROSE' else 0,
-        'GLICOSE': concentration if cryo == 'GLICOSE' else 0
+        'TREHALOSE': concentration if cryo == 'TREHALOSE' else 0
     }
 
 # Cache simples para modelos
