@@ -2,8 +2,11 @@ from xgboost import XGBRegressor
 from sklearn.model_selection import train_test_split
 import joblib
 import pandas as pd
+import logging
 from config import Config
 from src.data.loader import load_raw_data
+
+logger = logging.getLogger(__name__)
 
 class CryoModelTrainer:
     def __init__(self, cell_type: str) -> None:
@@ -22,23 +25,21 @@ class CryoModelTrainer:
             colsample_bytree=0.8
         )
 
-    def prepare_data(self, df: pd.DataFrame) -> tuple:
+    def prepare_data(self, df: pd.DataFrame):
+        """Prepara e valida os dados para treinamento.
+
+        Converte colunas para numérico, remove linhas com NA nas features/target
+        e filtra por limites configurados.
         """
-        Prepara os dados para treinamento.
-        Args:
-            df (pd.DataFrame): DataFrame bruto.
-        Returns:
-            tuple: X_train, X_test, y_train, y_test
-        """
-        """Preparação rigorosa dos dados"""
         # Converter e filtrar
         for col in Config.FEATURES + [Config.TARGET]:
             df[col] = pd.to_numeric(df[col], errors='coerce')
-        
+
         df = df.dropna(subset=Config.FEATURES + [Config.TARGET])
-        df = df[(df[Config.FEATURES] >= Config.MIN_CONC).all(axis=1) & 
-               (df[Config.FEATURES] <= Config.MAX_CONC).all(axis=1)]
-        
+        mask_low = (df[Config.FEATURES] >= Config.MIN_CONC).all(axis=1)
+        mask_high = (df[Config.FEATURES] <= Config.MAX_CONC).all(axis=1)
+        df = df[mask_low & mask_high]
+
         return train_test_split(
             df[Config.FEATURES],
             df[Config.TARGET],
@@ -46,26 +47,17 @@ class CryoModelTrainer:
             random_state=42
         )
     
-    def train_and_save(self) -> None:
-        """
-        Executa o fluxo completo de treinamento e salva o modelo.
-        Raises:
-            Exception: Se ocorrer erro no treinamento.
-        """
-        """Fluxo completo de treinamento"""
-        try:
-            df = load_raw_data(self.cell_type)
-            X_train, X_test, y_train, y_test = self.prepare_data(df)
-            
-            if len(X_train) < 10:
-                raise ValueError("Dados insuficientes para treinamento")
-            
-            self.model.fit(X_train, y_train)
-            model_path = Config.MODELS_DIR / f"xgboost_{self.cell_type}.pkl"
-            joblib.dump(self.model, model_path)
-            
-            return X_test, y_test
-            
-        except Exception as e:
-            print(f"Erro no treinamento: {str(e)}")
-            return None, None
+    def train_and_save(self):
+        """Executa treinamento e salva o modelo. Retorna (X_test, y_test)."""
+        df = load_raw_data(self.cell_type)
+        X_train, X_test, y_train, y_test = self.prepare_data(df)
+
+        if len(X_train) < 10:
+            raise ValueError("Dados insuficientes para treinamento")
+
+        self.model.fit(X_train, y_train)
+        model_path = Config.MODELS_DIR / f"xgboost_{self.cell_type}.pkl"
+        joblib.dump(self.model, model_path)
+
+        logger.info(f"Modelo salvo em {model_path}")
+        return X_test, y_test
