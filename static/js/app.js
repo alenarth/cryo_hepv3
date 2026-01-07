@@ -13,7 +13,7 @@ let currentData = null;
 let debounceTimeout = null;
 const CONCENTRATION_RANGES = {
     'DMSO': Array.from({length: 21}, (_, i) => i * 5),
-    'TREHALOSE': [0, 0.97, 1.94, 3.88, 7.77, 15.54, 31.08, 62.16, 100]
+    'TREHALOSE': Array.from({length: 21}, (_, i) => i * 5)
 };
 
 function updatePlotDebounced() {
@@ -114,27 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const values = CONCENTRATION_RANGES[cp] || CONCENTRATION_RANGES['DMSO'];
         // Remove input antigo
         if (concentrationInput) concentrationInput.remove();
-        let newInput;
-        if (cp === 'TREHALOSE') {
-            newInput = document.createElement('select');
-            newInput.id = 'concentration';
-            newInput.className = 'form-select';
-            values.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v;
-                opt.textContent = v + '%';
-                newInput.appendChild(opt);
-            });
-        } else {
-            newInput = document.createElement('input');
-            newInput.type = 'range';
-            newInput.id = 'concentration';
-            newInput.className = 'form-range';
-            newInput.min = Math.min(...values);
-            newInput.max = Math.max(...values);
-            newInput.step = 5;
-            newInput.value = values[0];
-        }
+        let newInput = document.createElement('input');
+        newInput.type = 'range';
+        newInput.id = 'concentration';
+        newInput.className = 'form-range';
+        newInput.min = Math.min(...values);
+        newInput.max = Math.max(...values);
+        newInput.step = 5;
+        newInput.value = values[0];
         currentConcSpan.parentNode.insertBefore(newInput, currentConcSpan.parentNode.firstChild.nextSibling);
         concentrationInput = newInput;
         concentrationInput.addEventListener('input', handleConcentrationChange);
@@ -143,12 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleConcentrationChange(e) {
-        let value = concentrationInput.value;
-        if (cryoprotectorSelect.value.toUpperCase() === 'TREHALOSE') {
-            value = value;
-        } else {
-            value = value + '%';
-        }
+        let value = concentrationInput.value + '%';
         currentConcSpan.textContent = value;
         document.querySelector('#specificViabilityResult').style.display = 'none';
         calcButton.innerHTML = `Calcular para ${value}`;

@@ -13,8 +13,9 @@ from marshmallow import Schema, fields, ValidationError, validates_schema
 
 CONCENTRATION_RANGES = {
     'DMSO': list(range(0, 101, 5)),
-    'TREHALOSE': [0, 0.97, 1.94, 3.88, 7.77, 15.54, 31.08, 62.16, 100]
-} 
+    'TREHALOSE': list(range(0, 101, 5))
+}
+
 
 
 # Configuração via ambiente
