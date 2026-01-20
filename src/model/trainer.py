@@ -48,6 +48,16 @@ class CryoModelTrainer:
             df[col] = pd.to_numeric(df[col], errors='coerce')
 
         df = df.dropna(subset=FEATURES + [TARGET])
+        
+        # Excluir controle contaminado: onde ambas as colunas são 0
+        dm_col = FEATURES[0]
+        tr_col = FEATURES[1]
+        df = df[~((df[dm_col] == 0) & (df[tr_col] == 0))]
+        
+        # Para modelo DEFAULT: usar apenas dados "puros" (um ou outro crioprotetor)
+        if self.variant == 'default':
+            df = df[((df[dm_col] > 0) & (df[tr_col] == 0)) | ((df[dm_col] == 0) & (df[tr_col] > 0))]
+        
         mask_low = (df[FEATURES] >= MIN_CONC).all(axis=1)
         mask_high = (df[FEATURES] <= MAX_CONC).all(axis=1)
         df = df[mask_low & mask_high]

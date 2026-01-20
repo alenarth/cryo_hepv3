@@ -233,7 +233,7 @@ def get_available_both_combinations(cell_type: str) -> list[tuple[float, float]]
         [(5.0, 5.0), (10.0, 10.0), (10.0, 5.0), ...]
     """
     try:
-        path = Config.RAW_DATA_DIR / f"{cell_type}.csv"
+        path = RAW_DATA_DIR / f"{cell_type}.csv"
         if not path.exists():
             logger.warning(f"Arquivo não encontrado: {path}")
             return []

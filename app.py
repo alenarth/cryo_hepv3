@@ -154,29 +154,6 @@ def developer_area() -> str:
     )
 
 
-@app.route('/train-variants', methods=['POST'])
-def train_variants_endpoint():
-    """Inicia o treinamento dos modelos (todas as variantes) em thread separada.
-
-    Nota: Esta rota apenas dispara o processo em background e retorna uma confirmação.
-    """
-    try:
-        from threading import Thread
-        from train_models import train_all_models
-
-        def runner():
-            try:
-                train_all_models()
-            except Exception as e:
-                logging.exception('Erro no treinamento em background: %s', e)
-
-        t = Thread(target=runner, daemon=True)
-        t.start()
-        return jsonify({'status': 'started'})
-    except Exception as e:
-        logging.error('Falha ao iniciar treinamento: %s', e)
-        return jsonify({'error': 'Falha ao iniciar treinamento.'}), 500
-
 @app.route('/predict', methods=['POST'])
 def predict() -> object:
     """API: Retorna viabilidade para todas as concentrações de um crioprotetor.

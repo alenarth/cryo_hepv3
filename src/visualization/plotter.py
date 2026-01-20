@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -10,9 +11,11 @@ from sklearn.model_selection import learning_curve, validation_curve
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from config import Config
 
 logger = logging.getLogger(__name__)
+
+# Definir GRAPHS_DIR
+GRAPHS_DIR = Path(__file__).parent.parent.parent / "static" / "graphs"
 
 def generate_model_analysis(model: object, X_test: pd.DataFrame, y_test: pd.Series, cell_type: str) -> None:
     """
@@ -26,7 +29,7 @@ def generate_model_analysis(model: object, X_test: pd.DataFrame, y_test: pd.Seri
         None
     """
     # Criar diretório específico para o tipo celular
-    graph_dir = Config.GRAPHS_DIR / cell_type
+    graph_dir = GRAPHS_DIR / cell_type
     graph_dir.mkdir(exist_ok=True, parents=True)  # Garante criação recursiva
     # 1. Calcular métricas
     # Converte colunas para float se necessário

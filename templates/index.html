@@ -28,14 +28,14 @@
                     </li>
                 </ul>
                 <button class="btn btn-outline-light ms-3" data-bs-toggle="modal" data-bs-target="#helpModal">
-                    <i class="fas fa-question-circle"></i> Ajuda
+                    Ajuda
                 </button>
             </div>
         </div>
     </nav>
 
     <div class="main-container index-main">
-    <h2 class="mb-4"><i class="fas fa-vials"></i> Simulador de Viabilidade Celular Pós-Criopreservação</h2>
+    <h2 class="mb-4">Simulador de Viabilidade Celular Pós-Criopreservação</h2>
         
         <div class="row g-4">
             <!-- Painel de Controle -->
@@ -110,27 +110,45 @@
         <div class="container">
             <div class="card shadow">
                 <div class="card-body">
-                    <h3 class="card-title mb-4"><i class="fas fa-info-circle"></i> Como Funciona</h3>
+                    <h3 class="card-title mb-4">Metodologia</h3>
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="lead">
-                                O sistema preditivo integra dados experimentais históricos de criopreservação com algoritmos de aprendizado de máquina para otimizar protocolos de congelamento celular.
-                                Ao selecionar um tipo celular e ajustar concentrações de crioprotetores, o modelo XGBoost - treinado em milhares de ensaios biológicos - calcula em tempo real a viabilidade esperada através de relações não lineares aprendidas entre composições químicas e respostas celulares.
+                            <h5>Modelo Preditivo</h5>
+                            <p>
+                                O sistema utiliza regressão XGBoost treinado em dados experimentais de criopreservação. O modelo aprende relações dose-resposta entre concentrações de crioprotetores (DMSO e TREHALOSE) e viabilidade celular pós-descongelamento.
                             </p>
                             <p>
-                                O núcleo do sistema utiliza árvores de decisão otimizadas que analisam padrões complexos em cinco dimensões (um crioprotetor principal + quatro adjuvantes), gerando curvas dose-resposta dinâmicas e identificando concentrações ideais que maximizam a sobrevivência celular. Cada predição é complementada por análises de incerteza (intervalos de confiança de 95%) e explicações quantitativas do impacto individual de cada composto, permitindo ajustes precisos baseados em evidências estatísticas robustas.
+                                As predições são baseadas em três tipos de dados:
                             </p>
+                            <ul class="small">
+                                <li><strong>HepG2</strong>: Linhagem hepatocelular humana (56 amostras)</li>
+                                <li><strong>Camundongo</strong>: Células totais de camundongo</li>
+                                <li><strong>Rato</strong>: Células totais de rato</li>
+                            </ul>
                         </div>
                         <div class="col-md-6">
-                            <div class="alert alert-info">
-                                <h5><i class="fas fa-lightbulb"></i> Instruções Rápidas:</h5>
-                                <ol class="mb-0">
-                                    <li>Selecione o tipo celular</li>
-                                    <li>Escolha o crioprotetor</li>
-                                    <li>Ajuste a concentração</li>
-                                    <li>Analise os resultados</li>
-                                </ol>
-                            </div>
+                            <h5>Variantes do Modelo</h5>
+                            <p>
+                                <strong>DEFAULT:</strong> Dados puros (apenas DMSO OU apenas TREHALOSE)
+                            </p>
+                            <p>
+                                <strong>DMSO_ONLY:</strong> Apenas amostras com TREHALOSE = 0%
+                            </p>
+                            <p>
+                                <strong>TREHALOSE_ONLY:</strong> Apenas amostras com DMSO = 0%
+                            </p>
+                            <p>
+                                <strong>BOTH:</strong> Combinações de DMSO + TREHALOSE simultâneos
+                            </p>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Resultados</h5>
+                            <p class="small text-muted">
+                                O simulador retorna: viabilidade percentual (0-100%), estimativa de perda de viabilidade, intervalo de confiança e qual variante de modelo foi utilizada. Os dados de treinamento excluem controles contaminados (amostras com 0% de ambos os crioprotetores).
+                            </p>
                         </div>
                     </div>
                 </div>
