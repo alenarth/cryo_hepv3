@@ -8,3 +8,5 @@ python-dotenv
 flask-limiter
 flask-swagger-ui
 marshmallow
+plotly
+pytest

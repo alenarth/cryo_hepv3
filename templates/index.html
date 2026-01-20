@@ -22,9 +22,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/">Simulador de Viabilidade</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/mixture">Mistura de Crioprotetores</a>
-                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="/developer">Área de Desenvolvedor</a>
                     </li>
@@ -55,8 +53,8 @@
                     <div class="mb-4">
                         <label class="form-label">Crioprotetor:</label>
                         <select id="cryoprotector" class="form-select">
-                            {% for cp in config.FEATURES %}
-                            <option value="{{ cp.split()[-1] }}">{{ cp.split()[-1] | title }}</option>
+                            {% for value, label in config.CRYOPROTECTORS %}
+                            <option value="{{ value }}">{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -86,7 +84,7 @@
                     <div id="optimalResult" class="optimal-value mt-4">
                         <h5>Ponto Ótimo:</h5>
                         <p class="mb-0">Concentração: <span id="optConc">-</span>%</p>
-                        <p>Viabilidade: <span id="optViab">-</span>%</p>
+                        <p>Viabilidade: <span id="optViab">-</span>% <small id="modelVariant" class="text-muted" style="display:none;">(variant)</small></p>
                     </div>
                 </div>
             </div>
@@ -146,7 +144,8 @@
         // Configurações dinâmicas
         const AppConfig = {
             FEATURES: {{ config.FEATURES | tojson | safe }},
-            CELL_TYPES: {{ config.CELL_TYPES | tojson | safe }}
+            CELL_TYPES: {{ config.CELL_TYPES | tojson | safe }},
+            CRYOPROTECTORS: {{ config.CRYOPROTECTORS | tojson | safe }}
         };
     </script>
     <script src="/static/js/app.js"></script>

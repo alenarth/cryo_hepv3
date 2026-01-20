@@ -1,136 +1,98 @@
-bash
-bash
----
+# Cryo-HepV3: Hepatocyte Viability Prediction
 
-# CryHepAI – Otimizador de Criopreservação de Hepatócitos
+ML system predicting cryopreserved hepatocyte viability based on cryoprotectant concentrations.
 
-**Plataforma de predição e otimização de protocolos de criopreservação baseada em machine learning.**
-
----
-
-## Visão Geral
-
-CryHepAI é uma aplicação web desenvolvida para prever e otimizar a viabilidade celular pós-criopreservação de hepatócitos (e modelos animais) utilizando modelos de machine learning (XGBoost). O sistema integra dados experimentais históricos, análise estatística, explicabilidade via SHAP e uma interface interativa para simulação de misturas de crioprotetores.
-
----
-
-## Funcionalidades Principais
-
-- **Simulador de Viabilidade:** Predição em tempo real da viabilidade celular para diferentes tipos celulares e crioprotetores.
-- **Mistura de Crioprotetores:** Permite simular e prever a viabilidade de misturas customizadas (2 a 5 compostos).
-- **Explicabilidade:** Gráficos SHAP, curva de aprendizado, curva de validação, análise de resíduos e métricas detalhadas.
-- **Interface Moderna:** UI responsiva com Bootstrap 5, gráficos Plotly e feedback visual.
-- **API Documentada:** Swagger UI disponível em `/swagger` para consulta e testes de endpoints.
-
----
-
-## Especificações Técnicas
-
-### Estrutura do Projeto
-
-```
-cryo_hepv3/
-│
-├── app.py                  # Backend Flask principal, rotas e validações
-├── config.py               # Configurações globais e features do modelo
-├── train_models.py         # Script de treinamento e análise dos modelos
-├── generate_model_reports.py # (opcional) Geração de relatórios extras
-│
-├── src/
-│   ├── data/loader.py      # Carregamento e pré-processamento dos dados
-│   ├── model/
-│   │   ├── trainer.py      # Classe de treinamento (XGBoost)
-│   │   ├── predictor.py    # Classe de predição e validação
-│   ├── utils/constants.py  # Constantes auxiliares
-│   └── visualization/plotter.py # Geração de gráficos e métricas
-│
-├── static/                 # Arquivos estáticos (CSS, JS, gráficos)
-├── templates/              # Templates Jinja2 (HTML)
-├── models/                 # Modelos treinados (.pkl)
-├── data/
-│   ├── raw/                # Dados brutos (CSV)
-│   └── processed/          # Dados processados
-└── tests/                  # Testes unitários
-```
-
-### Tecnologias e Bibliotecas
-
-- **Backend:** Flask 3, Marshmallow, Flask-Limiter, Flask-Swagger-UI
-- **Machine Learning:** XGBoost, scikit-learn, pandas, SHAP
-- **Visualização:** Plotly, Matplotlib
-- **Frontend:** Bootstrap 5, FontAwesome, Plotly.js
-- **Documentação:** Swagger UI
-
-### Modelagem e Algoritmo
-
-- **Modelo:** XGBoost Regressor, um para cada tipo celular (`hepg2`, `rat`, `mice`)
-- **Features:** `% DMSO`, `TREHALOSE`, `GLICEROL`, `SACAROSE`, `GLICOSE`
-- **Target:** `% QUEDA DA VIABILIDADE`
-- **Treinamento:** Validação rigorosa, split 80/20, métricas RMSE e R², análise de resíduos, explicabilidade SHAP
-- **Predição:** O input é sempre um vetor com todas as features, preenchendo zero para crioprotetores não usados na mistura.
-
-### Validações e Segurança
-
-- **Validação de Inputs:** Marshmallow para schemas, limites de concentração, tipos celulares e crioprotetores válidos, proibição de duplicidade na mistura.
-- **Rate Limiting:** 100 requisições/hora (global), 30/minuto para predição de mistura.
-- **Logging:** Log detalhado de erros e operações críticas.
-- **Swagger:** Documentação interativa dos endpoints.
-
----
-
-## Instalação e Execução
-
-### Pré-requisitos
-
-- Python 3.9+
-- pip
-
-### Instalação
+## Quick Start
 
 ```bash
-git clone https://github.com/seu-usuario/cryocell-predictor.git
-cd cryocell-predictor
+# Setup
 python -m venv venv
-# Ative o ambiente virtual:
-# Windows:
-venv\\Scripts\\activate
-# Linux/Mac:
-source venv/bin/activate
+source venv/bin/activate  # or: venv\Scripts\activate (Windows)
 pip install -r requirements.txt
+
+# Run
+python app.py
+# Visit: http://localhost:5000
 ```
 
-### Preparação dos Dados
-
-Coloque os arquivos de dados em `data/raw/`:
-- `hepg2.csv`
-- `rat.csv`
-- `mice.csv`
-
-### Treinamento dos Modelos
+## Train Models
 
 ```bash
 python train_models.py
 ```
 
-Os modelos treinados serão salvos em `models/` e os gráficos em `static/graphs/`.
+Trains 12 XGBoost models (3 cell types × 4 variants).
 
-### Execução da Aplicação
+## API Endpoints
 
+### Predict Range
 ```bash
-python app.py
+POST /predict
+{"cell_type": "hepg2", "cryoprotector": "DMSO"}
 ```
 
-Acesse em: [http://localhost:5000](http://localhost:5000)
+### Predict Specific
+```bash
+POST /specific-predict
+{"cell_type": "hepg2", "cryoprotector": "DMSO", "concentration": 10.5}
+```
 
----
+### Predict Mixture
+```bash
+POST /predict-mixture
+{
+  "cell_type": "hepg2",
+  "mixture": [
+    {"cryoprotector": "DMSO", "concentration": 5},
+    {"cryoprotector": "TREHALOSE", "concentration": 2}
+  ]
+}
+```
 
-## Uso
+### Predict Pair
+```bash
+POST /predict-both
+{"cell_type": "hepg2", "dmso": 5.0, "trehalose": 2.0}
+```
 
-- **Simulador de Viabilidade:** Escolha tipo celular, crioprotetor e concentração para visualizar curva e ponto ótimo.
-- **Mistura de Crioprotetores:** Adicione 2 crioprotetores, defina concentrações e obtenha a viabilidade prevista.
-- **Área do Desenvolvedor:** Visualize métricas, gráficos de explicabilidade e análise de erros dos modelos.
+### Available Combinations
+```bash
+GET /available-both/hepg2
+```
 
+## Structure
 
-## Licença
+```
+src/
+  ├── constants.py        # Config
+  ├── utils/helpers.py    # Validation
+  ├── model/              # Training & prediction
+  └── visualization/      # Plots
 
-MIT. Veja o arquivo `LICENSE.md`.
+data/raw/                 # CSV datasets
+models/                   # Trained models
+static/                   # CSS, JS, graphs
+templates/                # HTML interface
+```
+
+## Configuration
+
+Edit `src/constants.py`:
+- Cell types: `hepg2`, `rat`, `mice`
+- Cryoprotectors: `DMSO`, `TREHALOSE`, `BOTH`
+- Concentration ranges & validation
+
+## Data Format
+
+```
+% DMSO,TREHALOSE,% QUEDA DA VIABILIDADE
+0,0,2.5
+5,0,1.8
+10,0,3.2
+```
+
+## Requirements
+
+Python 3.10+, Flask, XGBoost, Pandas, Joblib, Plotly
+
+See `requirements.txt` for versions.

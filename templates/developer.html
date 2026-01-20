@@ -22,9 +22,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/">Simulador de Viabilidade</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/mixture">Mistura de Crioprotetores</a>
-                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link active" href="/developer">Área de Desenvolvedor</a>
                     </li>
@@ -53,6 +51,9 @@
                         </div>
                         <div class="alert alert-info">
                             <small>Selecione o modelo para visualizar suas métricas e gráficos de desempenho</small>
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                            <button id="trainBtn" class="btn btn-warning">🛠️ Treinar Modelos (variantes)</button>
                         </div>
                     </div>
                 </div>
@@ -160,6 +161,24 @@
             document.getElementById('validationCurveImg').src = `/static/graphs/${ct}/validation_curve.png`;
             document.getElementById('residualPlotImg').src = `/static/graphs/${ct}/residual_plot.png`;
         });
+
+        const trainBtn = document.getElementById('trainBtn');
+        if (trainBtn) {
+            trainBtn.addEventListener('click', function() {
+                trainBtn.disabled = true;
+                trainBtn.textContent = 'Iniciando...';
+                fetch('/train-variants', { method: 'POST' }).then(r => r.json()).then(js => {
+                    if (js.status === 'started') {
+                        trainBtn.textContent = 'Treinamento iniciado';
+                    } else {
+                        trainBtn.textContent = 'Falha ao iniciar';
+                    }
+                }).catch(err => {
+                    console.error(err);
+                    trainBtn.textContent = 'Erro';
+                });
+            });
+        }
     });
     </script>
 </body>

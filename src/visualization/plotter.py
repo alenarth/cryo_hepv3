@@ -1,10 +1,4 @@
-
-import sys
-from pathlib import Path
-# Garante que o diretório raiz do projeto está no sys.path
-ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
+import logging
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -17,6 +11,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from config import Config
+
+logger = logging.getLogger(__name__)
 
 def generate_model_analysis(model: object, X_test: pd.DataFrame, y_test: pd.Series, cell_type: str) -> None:
     """
@@ -36,20 +32,31 @@ def generate_model_analysis(model: object, X_test: pd.DataFrame, y_test: pd.Seri
     # Converte colunas para float se necessário
     for col in X_test.columns:
         # Normalize: operate on string representation safely to avoid dtype issues
-        s = X_test[col].astype(str).fillna('').str.replace('%', '').str.replace(',', '.').str.strip()
+        s = (
+            X_test[col]
+            .astype(str)
+            .fillna("")
+            .str.replace('%', '', regex=False)
+            .str.replace(',', '.', regex=False)
+            .str.strip()
+        )
         mask_invalid = ~s.str.match(r'^-?\d+(\.\d+)?$')
         if mask_invalid.any():
-            print(f"Valores problemáticos em {col}:", X_test[col][mask_invalid].unique())
+            logger.warning(f"Valores problemáticos em {col}: {X_test[col][mask_invalid].unique()}")
         X_test.loc[:, col] = pd.to_numeric(s, errors='coerce')
     X_test = X_test.astype(float)
-    print('Dtypes após conversão:', X_test.dtypes)
-    print('Valores nulos por coluna:', X_test.isnull().sum())
-    if y_test.dtype == 'object':
-        y_test = y_test.str.replace('%', '').str.replace(',', '.').str.strip()
+    logger.debug('Dtypes após conversão: %s', X_test.dtypes)
+    logger.debug('Valores nulos por coluna: %s', X_test.isnull().sum())
+    if not pd.api.types.is_numeric_dtype(y_test):
+        y_test = (
+            y_test
+            .astype(str)
+            .str.replace('%', '', regex=False)
+            .str.replace(',', '.', regex=False)
+            .str.strip()
+        )
         y_test = pd.to_numeric(y_test, errors='coerce')
     y_test = y_test.astype(float)
-    if y_test.dtype == 'object':
-        y_test = y_test.str.replace('%', '').str.replace(',', '.').astype(float)
     y_pred = model.predict(X_test)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     r2 = r2_score(y_test, y_pred)
@@ -103,8 +110,9 @@ def generate_model_analysis(model: object, X_test: pd.DataFrame, y_test: pd.Seri
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_test)
     fig2 = go.Figure()
+    feature_names = getattr(model, 'feature_names_in_', X_test.columns)
     fig2.add_trace(go.Bar(
-        x=model.feature_names_in_,
+        x=feature_names,
         y=np.abs(shap_values).mean(0),
         marker_color='#4CAF50',
         name='Importância SHAP'

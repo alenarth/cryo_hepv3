@@ -1,24 +1,17 @@
 import pandas as pd
-from config import Config
+from pathlib import Path
+
+RAW_DATA_DIR = Path(__file__).parent.parent.parent / "data" / "raw"
+FEATURES = ['% DMSO', 'TREHALOSE']
+TARGET = '% QUEDA DA VIABILIDADE'
 
 def load_raw_data(cell_type: str) -> pd.DataFrame:
-    """
-    Carrega dados brutos do tipo celular informado.
-    Args:
-        cell_type (str): Nome do tipo celular.
-    Returns:
-        pd.DataFrame: DataFrame validado com os dados.
-    Raises:
-        FileNotFoundError: Se o arquivo não existir.
-        ValueError: Se colunas obrigatórias estiverem faltando.
-    """
-    file_path = Config.RAW_DATA_DIR / f"{cell_type}.csv"
-    
+    file_path = RAW_DATA_DIR / f"{cell_type}.csv"
     if not file_path.exists():
-        raise FileNotFoundError(f"Arquivo {cell_type}.csv não encontrado")
+        raise FileNotFoundError(f"File {cell_type}.csv not found")
     
-    def _safe_float(x):
-        s = str(x).replace('%','').replace(',','.').strip()
+    def safe_float(x):
+        s = str(x).replace('%', '').replace(',', '.').strip()
         if s == '' or s.lower() == 'nan':
             return float('nan')
         return float(s)
@@ -27,15 +20,10 @@ def load_raw_data(cell_type: str) -> pd.DataFrame:
         file_path,
         decimal=',',
         thousands='.',
-        converters={
-            col: _safe_float
-            for col in Config.FEATURES + [Config.TARGET]
-        }
+        converters={col: safe_float for col in FEATURES + [TARGET]}
     )
     
-    # Validação de colunas
-    missing = [col for col in Config.FEATURES + [Config.TARGET] if col not in df.columns]
+    missing = [col for col in FEATURES + [TARGET] if col not in df.columns]
     if missing:
-        raise ValueError(f"Colunas faltando: {missing}")
-        
+        raise ValueError(f"Missing columns: {missing}")
     return df
