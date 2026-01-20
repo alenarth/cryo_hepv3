@@ -63,7 +63,7 @@ async function updatePlot() {
         };
         Plotly.newPlot('viabilityPlot', [trace], layout, {responsive: true, displayModeBar: false}).then(() => {
             hideSpinner();
-            document.getElementById('downloadPlotBtn').style.display = 'inline-block';
+            document.getElementById('downloadPlotBtn').classList.add('show');
         });
         document.getElementById('optConc').textContent = currentData.optimal.concentration;
         document.getElementById('optViab').textContent = currentData.optimal.value;
@@ -71,9 +71,9 @@ async function updatePlot() {
         const mvEl = document.getElementById('modelVariant');
         if (currentData.model_variant && mvEl) {
             mvEl.textContent = `(${currentData.model_variant})`;
-            mvEl.style.display = 'inline';
+            mvEl.classList.remove('d-none');
         } else if (mvEl) {
-            mvEl.style.display = 'none';
+            mvEl.classList.add('d-none');
         }
     } catch (error) {
         hideSpinner();
@@ -114,7 +114,7 @@ async function calculateSpecificViability() {
                 return;
             }
             document.getElementById('specificViabilityValue').textContent = js.viability;
-            document.getElementById('specificViabilityResult').style.display = 'block';
+            document.getElementById('specificViabilityResult').classList.add('show');
         } catch (err) {
             console.error('Erro:', err);
         }
@@ -140,7 +140,7 @@ async function calculateSpecificViability() {
             return;
         }
         document.getElementById('specificViabilityValue').textContent = data.viability;
-        document.getElementById('specificViabilityResult').style.display = 'block';
+        document.getElementById('specificViabilityResult').classList.add('show');
     } catch (error) {
         console.error('Erro:', error);
     }

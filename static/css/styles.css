@@ -41,11 +41,14 @@ body {
     font-weight: 700;
     font-size: 1.4rem;
     letter-spacing: 1px;
+    gap: 0.75rem;
 }
 
 .navbar-brand img {
-    max-height: 32px;
+    max-height: 48px;
     width: auto;
+    filter: brightness(0) invert(1);
+    transition: filter 0.2s;
 }
 
 .nav-link {
@@ -312,6 +315,23 @@ body {
 
 .footer p {
     margin: 8px 0;
+}
+
+/* Hidden by default */
+#specificViabilityResult {
+    display: none;
+}
+
+#specificViabilityResult.show {
+    display: block;
+}
+
+#downloadPlotBtn {
+    display: none;
+}
+
+#downloadPlotBtn.show {
+    display: inline-block;
 }
 
 /* Spinner Overlay */
