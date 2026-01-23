@@ -33,7 +33,7 @@ cd cryo_hepv3
 
 # Criar ambiente virtual
 python -m venv venv
-source venv/bin/activate  # Linux/macOS
+source venv/Scripts/activate  # Linux/macOS
 # ou
 venv\Scripts\activate  # Windows
 

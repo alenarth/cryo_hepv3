@@ -14,7 +14,7 @@ import logging
 import os
 
 from src.constants import (
-    VALID_CELL_TYPES, VALID_CRYOPROTECTORS, FEATURE_MAP, MODEL_FEATURES
+    VALID_CELL_TYPES, VALID_CRYOPROTECTORS, FEATURE_MAP, MODEL_FEATURES, FLOAT_TOLERANCE
 )
 from src.utils.helpers import (
     build_feature_row, clamp_viability,
@@ -69,7 +69,7 @@ def predict_mixture():
         if not model:
             return jsonify({'error': f'Modelo não encontrado: {cell_type}'}), 404
         
-        pred = 100 - model.predict(pd.DataFrame([input_dict]))[0]
+        pred = 100 - model.predict(pd.DataFrame([[input_dict.get(col, 0.0) for col in MODEL_FEATURES]], columns=MODEL_FEATURES).values, validate_features=False)[0]
         return jsonify({'viability': clamp_viability(pred), 'model_variant': variant})
     except Exception as e:
         logger.error(f"Erro /predict-mixture: {e}")
@@ -205,9 +205,10 @@ def _predict_both_from_dataset(model, cell_type: str) -> object:
         input_dict = {col: 0.0 for col in MODEL_FEATURES}
         input_dict[FEATURE_MAP['DMSO']] = float(d)
         input_dict[FEATURE_MAP['TREHALOSE']] = float(t)
-        input_data = pd.DataFrame([input_dict])
+        row_values = [input_dict.get(col, 0.0) for col in MODEL_FEATURES]
+        input_data = pd.DataFrame([row_values], columns=MODEL_FEATURES)
         
-        pred = 100 - model.predict(input_data)[0]
+        pred = 100 - model.predict(input_data.values, validate_features=False)[0]
         viability.append(clamp_viability(pred))
     
     max_viab = max(viability)
@@ -232,8 +233,10 @@ def _predict_both_fallback(model, cell_type: str) -> object:
     viability = []
     
     for conc in concentrations:
-        input_data = pd.DataFrame([build_feature_row('BOTH', conc)])
-        pred = 100 - model.predict(input_data)[0]
+        row_dict = build_feature_row('BOTH', conc)
+        row_values = [row_dict.get(col, 0.0) for col in MODEL_FEATURES]
+        input_data = pd.DataFrame([row_values], columns=MODEL_FEATURES)
+        pred = 100 - model.predict(input_data.values, validate_features=False)[0]
         viability.append(clamp_viability(pred))
     
     max_viab = max(viability)
@@ -282,8 +285,11 @@ def _predict_single_cryoprotector(model, cell_type: str, cryoprotector: str) -> 
     viability = []
     
     for conc in concentrations:
-        input_data = pd.DataFrame([build_feature_row(cryoprotector, conc)])
-        pred = 100 - model.predict(input_data)[0]
+        row_dict = build_feature_row(cryoprotector, conc)
+        # Criar DataFrame com valores na ordem correta das colunas
+        row_values = [row_dict.get(col, 0.0) for col in MODEL_FEATURES]
+        input_data = pd.DataFrame([row_values], columns=MODEL_FEATURES)
+        pred = 100 - model.predict(input_data.values, validate_features=False)[0]
         viability.append(clamp_viability(pred))
     
     max_viab = max(viability)
@@ -342,8 +348,10 @@ def specific_predict() -> object:
             return jsonify({'error': f"Modelo não encontrado para: {cell_type}"}), 404
         
         # Fazer predição
-        input_data = pd.DataFrame([build_feature_row(cryoprotector, concentration)])
-        predicted_drop = model.predict(input_data)[0]
+        row_dict = build_feature_row(cryoprotector, concentration)
+        row_values = [row_dict.get(col, 0.0) for col in MODEL_FEATURES]
+        input_data = pd.DataFrame([row_values], columns=MODEL_FEATURES)
+        predicted_drop = model.predict(input_data.values, validate_features=False)[0]
         viability = clamp_viability(100 - predicted_drop)
         
         logger.info(f"Específica: {cell_type}, {cryoprotector}, {concentration} -> {viability}")
@@ -420,9 +428,10 @@ def predict_both() -> object:
         input_dict = {col: 0.0 for col in MODEL_FEATURES}
         input_dict[FEATURE_MAP['DMSO']] = float(dmso)
         input_dict[FEATURE_MAP['TREHALOSE']] = float(tre)
-        input_data = pd.DataFrame([input_dict])
+        row_values = [input_dict.get(col, 0.0) for col in MODEL_FEATURES]
+        input_data = pd.DataFrame([row_values], columns=MODEL_FEATURES)
         
-        pred = 100 - model.predict(input_data)[0]
+        pred = 100 - model.predict(input_data.values, validate_features=False)[0]
         viability = clamp_viability(pred)
         
         logger.info(f"Ambos: {cell_type} DMSO={dmso}%, TRE={tre}% -> {viability}")
