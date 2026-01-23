@@ -55,7 +55,7 @@ MAX_MIXTURE_COMPONENTS = 5
 # ========== Valores de Viabilidade ==========
 VIABILITY_MIN = 0.0
 VIABILITY_MAX = 100.0
-VIABILITY_DECIMAL_PLACES = 1
+VIABILITY_DECIMAL_PLACES = 2
 
 # ========== Tolerância de Float ==========
 FLOAT_TOLERANCE = 1e-6

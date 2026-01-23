@@ -66,16 +66,15 @@
                         </div>
                     </div>
 
-                    <div class="row g-3 align-items-center mt-2">
-                        <div class="col-auto">
-                            <button class="btn btn-primary" onclick="calculateSpecificViability()">
-                                Calcular para 0%
-                            </button>
-                        </div>
-                        <div class="col-auto">
-                            <div class="alert alert-success" role="alert" id="specificViabilityResult">
-                                Viabilidade: <strong><span id="specificViabilityValue">-</span>%</strong>
-                            </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary" id="calcButton" onclick="calculateSpecificViability()">
+                            Calcular
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <div class="alert alert-success" role="alert" id="specificViabilityResult">
+                            Viabilidade: <strong><span id="specificViabilityValue">-</span>%</strong>
                         </div>
                     </div>
 

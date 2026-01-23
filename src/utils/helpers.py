@@ -183,8 +183,9 @@ def validate_concentration(concentration: float, cryoprotector: str) -> tuple[bo
     if not allowed:
         return False, f"Crioprotetor inválido: {cryoprotector}"
     
-    # Permite com tolerância de ponto flutuante
-    if not any(abs(conc_float - c) < FLOAT_TOLERANCE for c in allowed):
+    # Converte allowed para float se necessário e verifica tolerância
+    allowed_floats = [float(c) for c in allowed]
+    if not any(abs(conc_float - c) < max(FLOAT_TOLERANCE, 0.1) for c in allowed_floats):
         return False, f"Concentração {conc_float} não permitida. Valores: {allowed}"
     
     return True, None

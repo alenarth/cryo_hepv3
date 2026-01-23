@@ -66,7 +66,7 @@ async function updatePlot() {
             document.getElementById('downloadPlotBtn').classList.add('show');
         });
         document.getElementById('optConc').textContent = currentData.optimal.concentration;
-        document.getElementById('optViab').textContent = currentData.optimal.value;
+        document.getElementById('optViab').textContent = currentData.optimal.value.toFixed(2);
         // Mostrar variante do modelo se disponível
         const mvEl = document.getElementById('modelVariant');
         if (currentData.model_variant && mvEl) {
@@ -113,7 +113,7 @@ async function calculateSpecificViability() {
                 alert((js.errors || js.error || 'Erro desconhecido'));
                 return;
             }
-            document.getElementById('specificViabilityValue').textContent = js.viability;
+            document.getElementById('specificViabilityValue').textContent = js.viability.toFixed(2);
             document.getElementById('specificViabilityResult').classList.add('show');
         } catch (err) {
             console.error('Erro:', err);
@@ -139,7 +139,7 @@ async function calculateSpecificViability() {
             alert(data.error);
             return;
         }
-        document.getElementById('specificViabilityValue').textContent = data.viability;
+        document.getElementById('specificViabilityValue').textContent = data.viability.toFixed(2);
         document.getElementById('specificViabilityResult').classList.add('show');
     } catch (error) {
         console.error('Erro:', error);
@@ -183,12 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         sel.appendChild(opt);
                     });
                     currentConcSpan.parentNode.insertBefore(sel, currentConcSpan.parentNode.firstChild.nextSibling);
-                    // Atualiza o texto do botão e habilita
+                    // Habilita o botão
                     if (calcButton) {
                         calcButton.disabled = false;
-                        calcButton.innerHTML = 'Calcular combinação selecionada';
                     }
-                    // Quando mudar seleção, atualiza o texto
+                    // Quando mudar seleção, atualiza o display
                     sel.addEventListener('change', () => {
                         const [d, t] = sel.value.split('_');
                         currentConcSpan.textContent = `${d}% + ${t}%`;
@@ -205,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentConcSpan.parentNode.insertBefore(noteEmpty, currentConcSpan.parentNode.firstChild.nextSibling);
                     if (calcButton) {
                         calcButton.disabled = true;
-                        calcButton.innerHTML = 'Calcular para —';
                     }
                 }
                 // Atualiza o gráfico
@@ -235,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reativa o botão de cálculo específico
         if (calcButton) {
             calcButton.disabled = false;
-            calcButton.innerHTML = `Calcular para ${currentConcSpan.textContent}`;
         }
         handleConcentrationChange();
     }
@@ -243,8 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleConcentrationChange(e) {
         let value = concentrationInput.value + '%';
         currentConcSpan.textContent = value;
-        document.querySelector('#specificViabilityResult').style.display = 'none';
-        calcButton.innerHTML = `Calcular para ${value}`;
+        document.querySelector('#specificViabilityResult').classList.remove('show');
         updatePlotDebounced();
     }
 
